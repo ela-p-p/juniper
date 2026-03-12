@@ -142,7 +142,7 @@ Endpoint:
 
 - PUT /v1/partners/:partnerId/ruleset
 
-Behavior:
+Behaviour:
 
 1. Validate path params.
 2. Validate payload shape with Zod.
@@ -156,7 +156,7 @@ Behavior:
 
 - Full form with condition
 - Compact form with field + command + value
-- Generic command map form
+- Generic condition map form (field mapped to command/value)
 
 ### Normalized rule guarantees
 

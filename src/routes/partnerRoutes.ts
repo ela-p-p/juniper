@@ -26,11 +26,6 @@ interface RuleInputSpec {
   allowedValues?: unknown[];
 }
 
-interface RulesetAppendPayload {
-  partnerId: string;
-  rules: unknown[];
-}
-
 const reservedRuleKeys = new Set([
   "id",
   "description",
@@ -386,7 +381,7 @@ export async function registerPartnerRoutes(app: FastifyInstance): Promise<void>
       return reply.code(404).send({ message: "Unknown partnerId" });
     }
 
-    const validation = validateFinancingRequest(request.body, partner);
+    const validation = validateFinancingRequest(request.body);
     if (!validation.ok) {
       return reply.code(400).send({
         partnerId: partner.partnerId,

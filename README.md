@@ -4,6 +4,16 @@ Applied Pay Senior Software Engineer technical challenge POC.
 
 This project implements a configurable financing rules API in Node.js + TypeScript.
 
+## Architecture Diagram
+
+See docs/architecture.md.
+
+## Techincal Documentation
+
+Starting point of my development process. Breakdown feature into technical parts.
+
+see docs/technical-design.dm
+
 ## What It Does
 
 - Evaluates policy payment financing eligibility per partner
@@ -46,7 +56,19 @@ npm run build
 npm run start
 ```
 
+5. Run lint checks
+
+```bash
+npm run lint
+```
+
 Default server URL: http://localhost:3000
+
+## Pre-commit Linting
+
+- Husky is configured with a pre-commit hook.
+- Every commit runs `npm run lint` and blocks the commit if lint fails.
+- After pulling changes, run `npm install` to ensure hooks are installed via the prepare script.
 
 ## API Endpoints
 
@@ -161,8 +183,5 @@ partner request can provide a matching value.
 - External dependency checks (credit, sanctions, etc.) require integration code
 - Stateful rules across requests are out of scope without persistence
 
-## Architecture Diagram
-
-See docs/architecture.md.
 
 

@@ -6,9 +6,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx watch src/server.ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test": "node -e \"console.log('No tests yet')\""
+    "test": "node -e \"console.log('No tests yet')\"",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -20,8 +23,13 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.5.0",
+    "eslint": "^10.0.3",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.0"
   }
 }

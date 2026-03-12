@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DecisionError, FinancingRequest, PartnerConfig } from "../types.js";
+import { DecisionError, FinancingRequest } from "../types.js";
 
 const baseSchema = z.object({
   amount: z.number().positive(),
@@ -23,7 +23,6 @@ const coreRequestFields = new Set([
 
 export function validateFinancingRequest(
   payload: unknown,
-  _partnerConfig: PartnerConfig,
 ):
   | { ok: true; value: FinancingRequest }
   | { ok: false; errors: DecisionError[] } {
