@@ -134,7 +134,7 @@ Implementation: [src/engine/evaluateRules.ts](src/engine/evaluateRules.ts)
 { "fact": "inputAmountLimit" }
 ```
 
-- Compatibility alias: if condition path starts with attributes., engine resolves the same field without attributes. prefix.
+- Fact references resolve against the effective request payload used for evaluation (including default termMonths and paymentFrequency when omitted).
 
 ## 8. Ruleset Update Flow
 

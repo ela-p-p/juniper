@@ -27,16 +27,7 @@ function getFactValue(request: NormalizedRuleEvaluationRequest, factPath: string
 }
 
 function resolveFactValue(request: NormalizedRuleEvaluationRequest, factPath: string): unknown {
-  const value = getFactValue(request, factPath);
-  if (value !== undefined) {
-    return value;
-  }
-
-  if (factPath.startsWith("attributes.")) {
-    return getFactValue(request, factPath.slice("attributes.".length));
-  }
-
-  return undefined;
+  return getFactValue(request, factPath);
 }
 
 function isFactReference(value: unknown): value is { fact: string } {
