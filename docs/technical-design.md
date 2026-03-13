@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document describes the technical design of the Juniper proof of concept, based on the Applied Pay take-home assignment.
+This document describes the technical design of the Juniper proof of concept.
 
 The goal of this POC is to provide partner-configurable financing rules over REST APIs, without requiring code changes for most rule additions.
 
