@@ -8,29 +8,9 @@ This project implements a configurable financing rules API in Node.js + TypeScri
 
 See docs/architecture.md.
 
-## Techincal Documentation
+## Execution instructions 
 
-Starting point of my development process. Breakdown feature into technical parts.
-
-see docs/technical-design.dm
-
-## What It Does
-
-- Evaluates policy payment financing eligibility per partner
-- Returns rule-based validation reasons when not financeable
-- Returns installment schedule when financeable
-- Supports partner-specific configurable rules and dynamic top-level request fields
-- Logs response times in milliseconds to console
-- Uses in-memory configuration only (no database, data resets on restart)
-
-## Tech Stack
-
-- Node.js
-- TypeScript
-- Fastify
-- Zod
-
-## Run Locally
+### Run Locally
 
 1. Install dependencies
 
@@ -64,13 +44,80 @@ npm run lint
 
 Default server URL: http://localhost:3000
 
-## Pre-commit Linting
+### Pre-commit Linting
 
 - Husky is configured with a pre-commit hook.
 - Every commit runs `npm run lint` and blocks the commit if lint fails.
 - After pulling changes, run `npm install` to ensure hooks are installed via the prepare script.
 
+## Libraries or frameworks/dependencies 
+
+- Node.js
+- TypeScript
+- Fastify 
+- Zod (schema validation)
+- Husky (pre-commit hook)
+- Pino (logging)
+
+## Assumptions
+
+- Rules are required checks. If any rule condition evaluates to false, financeable is false.
+- Rules can only be created, not deleted or updated
+
+## LLM usage
+
+- clean up techincal document I wrote (docs/technical-design.md)
+  - prompt: clean up techincal document
+  - input: technical-design document
+
+- build architecture diagram
+  - prompt: pasted technical document into Excalidraw AI text-to-drawing to build (excalidraw.com)
+
+- build Juniper service
+  - prompt: build this service and name it Juniper
+  - input: technical document pasted into CoPilot
+
+## More...
+
+### Techincal Documentation
+
+See docs/technical-design.md
+
+Starting point of my development process. Here I breakdown the feature into technical parts. 
+
+This document was used to:
+- build the architecture diagram
+- build this service
+
+Once the service was built I reviewed and made changes when required.
+For instance, my technical doc specified an extensible ruleset builder yet the LLM built to specific rules which was not extensible. 
+- example: a specific rule to test if a hotel insurance policy could be financed using Google wallet and be valued at $100k
+
+### API Documentation
+
+Detailed request and response documentation: docs/api.md
+
+### Configurability and Extensibility
+
+#### What still requires code changes
+
+- New operator semantics beyond current operator set
+- More complex boolean expression trees (AND/OR/NOT nesting is not in current model)
+- Date-specific operator semantics
+- External dependency checks
+
+## What the Service Does
+
+- Evaluates policy payment financing eligibility per partner
+- Returns rule-based validation reasons when not financeable
+- Returns installment schedule when financeable
+- Supports partner-specific configurable rules and dynamic top-level request fields
+- Logs response times in milliseconds to console
+- Uses in-memory configuration only (no database, data resets on restart)
+
 ## API Endpoints
+
+Detailed request and response documentation: docs/api.md
 
 - GET /health
 - GET /v1/partners/:partnerId/schema

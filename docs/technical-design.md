@@ -32,12 +32,13 @@ Given request data (amount, policy/payment fields, and partner-specific fields),
 - External integrations (credit, sanctions, fraud, etc.)
 - Authentication and authorization
 
-## 4. Design Assumptions
+## 4. Assumptions
 
-- If termMonths is missing, default term is 12 months.
-- If paymentFrequency is missing, default is MONTHLY.
+- If termMonths is not provided in the request, partner default termMonths is applied.
+- If paymentFrequency is not provided in the request, partner default paymentFrequency is applied.
 - Partner-specific fields are sent as top-level JSON properties in the decision request.
 - Rules are required checks. If any rule condition evaluates to false, financeable is false.
+- Ruleset management is append-only in this POC (rules can be added, but not updated or deleted).
 - Partner updates to mandatory fields do not require backward compatibility.
 
 ## 5. High-Level Architecture
@@ -47,16 +48,17 @@ Architecture diagram is in [docs/architecture.md](docs/architecture.md).
 Core components:
 
 - Service built using Fastify REST API
-- Request validator (Zod) for all endpoints
-    - valid: go to Rule engine
-    - invalid: return schema error
-- Rule engine:
-    - evaluate new rules by normalizing and validating 
-        - valid: append new rules
-        - invalid: return schema error
-    - get financing eligibility 
-        - valid: installment calculator
-        - invalid: return failed ruleset error
+- Request validator (Zod) for all endpoints:
+  - valid input: continue to ruleset normalization or decision evaluation
+  - invalid input: return 400 with validation details
+- Ruleset ingestion pipeline:
+  - normalize accepted incoming rule formats
+  - validate command and condition shape
+  - append normalized rules in memory
+- Decision pipeline:
+  - apply defaults to missing term/frequency
+  - evaluate rules (required checks)
+  - return decline errors or calculate installments
 - In-memory partner config registry
 - Timing instrumentation in request lifecycle and decision pipeline
 
@@ -151,11 +153,13 @@ Behaviour:
 5. Validate rule commands and condition shape.
 6. Generate default error block when missing.
 7. Append normalized rules to in-memory partner rules.
+8. Return append summary: partnerId, totalRules, appendedRules.
 
 ### Supported incoming rule formats
 
 - Full form with condition
 - Compact form with field + command + value
+    - if no specific error message is given, a message is created using the rule field name
 - Generic condition map form (field mapped to command/value)
 
 ### Normalized rule guarantees
@@ -196,6 +200,7 @@ Implementation: [src/engine/validateRequest.ts](src/engine/validateRequest.ts)
 - Zod validates base required fields and optional term/frequency.
 - Schema uses passthrough mode, allowing dynamic top-level fields.
 - Unknown top-level fields are preserved and forwarded to rule evaluation.
+- No nested attributes wrapper is required for partner-defined fields.
 
 ## 11. API Surface
 
@@ -204,10 +209,12 @@ Implementation: [src/routes/partnerRoutes.ts](src/routes/partnerRoutes.ts)
 ### GET /health
 
 - Basic service liveness response.
+- Implemented in [src/server.ts](src/server.ts).
 
 ### GET /v1/partners/:partnerId/schema
 
 - Returns base request fields and partner defaults.
+- Returns ruleInputs derived from configured rules (includes allowedValues for list rules).
 
 ### GET /v1/partners/:partnerId/ruleset
 
@@ -216,6 +223,7 @@ Implementation: [src/routes/partnerRoutes.ts](src/routes/partnerRoutes.ts)
 ### PUT /v1/partners/:partnerId/ruleset
 
 - Appends rules to in-memory ruleset after validation/normalization.
+- Supports full condition form, compact field/command/value form, and generic condition map form.
 - Returns totalRules and appendedRules.
 
 ### POST /v1/partners/:partnerId/financing-decisions
@@ -236,7 +244,13 @@ Implementation: [src/routes/partnerRoutes.ts](src/routes/partnerRoutes.ts)
 
 Server hooks and logging implementation: [src/server.ts](src/server.ts)
 
-## 13. Configurability and Extensibility
+## 13. Developer Quality Gates
+
+- ESLint is configured for TypeScript sources using flat config.
+- Husky pre-commit hook runs lint checks before commit is accepted.
+- TypeScript build (`tsc`) remains the compile-time safety check.
+
+## 14. Configurability and Extensibility
 
 ### What is configurable via partner config only
 
@@ -251,31 +265,3 @@ Server hooks and logging implementation: [src/server.ts](src/server.ts)
 - More complex boolean expression trees (AND/OR/NOT nesting is not in current model)
 - Date-specific operator semantics
 - External dependency checks
-
-## 14. Requirement Coverage
-
-Functional and technical requirements from the assignment are satisfied as follows:
-
-- RESTful API endpoints implemented for schema, ruleset read/update, and decisions.
-- Rule engine is partner-configurable and in-memory.
-- Most rule additions are config-only (no code change needed).
-- Financing decision returns errors or installment details depending on eligibility.
-- Default term/frequency behavior implemented with request override support.
-- Response-time instrumentation is present in logs and decision payload.
-- No data persistence across restarts.
-
-## 15. Known POC Risks
-
-- No auth means endpoints are open in this POC.
-- In-memory ruleset updates are process-local and non-durable.
-- Concurrent writes are not coordinated across instances.
-- Rule condition model intentionally favors simplicity over complex logic expressiveness.
-
-## 16. Suggested Next Steps (Production Hardening)
-
-- Add authentication/authorization and partner scoping.
-- Persist partner rulesets in a durable datastore.
-- Add idempotency and optimistic concurrency for ruleset updates.
-- Add audit trail for rule changes.
-- Add integration test suite and contract tests.
-- Add richer rule expression grammar only if needed by product requirements.

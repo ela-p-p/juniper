@@ -26,6 +26,7 @@ app.addHook("onResponse", async (request, reply) => {
   );
 });
 
+// API: Liveness endpoint for basic service health checks.
 app.get("/health", async () => {
   return {
     status: "ok",
