@@ -1,6 +1,6 @@
 # Juniper
 
-Applied Pay Senior Software Engineer technical challenge POC.
+Technical challenge POC.
 
 This project implements a configurable financing rules API in Node.js + TypeScript.
 
